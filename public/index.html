@@ -396,24 +396,34 @@
     }
 
     function onIpInput() {
-      const ip = document.getElementById('customIpInput').value.trim();
-      if (activeTarget === 'rameeza') {
-        targets.rameeza.ip = ip;
-        document.getElementById('rameeza-ip-label').textContent = ip ? ip + ':8000' : 'Enter IP below';
-      } else if (activeTarget === 'custom') {
-        targets.custom.ip = ip;
+      const inputVal = document.getElementById('customIpInput').value.trim();
+      let cleanUrl = inputVal;
+      
+      // If user typed a full URL like https://... or http://...
+      if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://')) {
+        cleanUrl = cleanUrl.replace(/\/+$/, ''); // remove trailing slash
+        targets[activeTarget].fullUrl = cleanUrl;
+      } else {
+        targets[activeTarget].fullUrl = null;
+        if (cleanUrl.includes(':')) {
+          const parts = cleanUrl.split(':');
+          targets[activeTarget].ip = parts[0];
+          targets[activeTarget].port = parseInt(parts[1]) || 8000;
+        } else {
+          targets[activeTarget].ip = cleanUrl;
+          targets[activeTarget].port = 8000;
+        }
       }
-      // Also handle if user typed ip:port
-      if (ip.includes(':')) {
-        const parts = ip.split(':');
-        targets[activeTarget].ip = parts[0];
-        targets[activeTarget].port = parseInt(parts[1]) || 8000;
+
+      if (activeTarget === 'rameeza') {
+        document.getElementById('rameeza-ip-label').textContent = cleanUrl ? (cleanUrl.length > 20 ? cleanUrl.substring(0, 18) + '...' : cleanUrl) : 'Enter IP below';
       }
       updateStatus();
     }
 
     function getServerUrl() {
       const t = targets[activeTarget];
+      if (t.fullUrl) return t.fullUrl;
       if (!t.ip) return null;
       return `http://${t.ip}:${t.port}`;
     }
