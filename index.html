@@ -383,16 +383,13 @@
       document.querySelectorAll('.target-btn').forEach(b => b.classList.remove('active'));
       document.getElementById('btn-' + name).classList.add('active');
 
-      // If rameeza or custom, focus the IP input
+      // If switching to custom or rameeza, apply what is currently in the input box
       if (name === 'rameeza' || name === 'custom') {
         document.getElementById('customIpInput').focus();
-        const ip = document.getElementById('customIpInput').value.trim();
-        if (ip) {
-          targets[name].ip = ip;
-        }
+        onIpInput();
+      } else {
+        updateStatus();
       }
-
-      updateStatus();
     }
 
     function onIpInput() {
